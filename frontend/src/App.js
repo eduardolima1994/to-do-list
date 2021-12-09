@@ -5,16 +5,13 @@ import Item from './components/item';
 export default function App() {
 
   const [itens, setItens] = useState([])
+  const [filterItens, setFilterItens] = useState({filter: false, active: false})
 
   function getData(){
     fetch('http://localhost:3000/todo/list', {method:"GET"})
     .then(response => response.json())
     .then(data => setItens(data))
   }
-
-  useEffect(()=>{
-    getData();
-  }, []);
 
   function insertDocument(){
     fetch('http://localhost:3000/todo/add', 
@@ -49,21 +46,43 @@ export default function App() {
       .then(() => getData())
   }
 
+  useEffect(()=>{
+    getData();
+  }, []);
+
+  const itensShow = filterItens.filter ? itens.filter(item => item.active === filterItens.active) : itens
+
   return (
     <div className="wrapper">
-      <h1>To Do App</h1>
 
-      { itens.map(item=>{
-        return(<Item item={item} updateDocument={updateDocument} deleteDocument={deleteDocument} />)
-      }) 
-      }
-      
+      <div className="to-do-list">
 
-      <button>Todos</button>
-      <button>Pendentes</button>
-      <button>Concluídos</button>
+        <h1>To Do App</h1>
 
-      <button onClick={insertDocument}>Inserir novo To-Do</button>
+        { itensShow.map(item=>{
+          return(<Item item={item} updateDocument={updateDocument} deleteDocument={deleteDocument} />)
+        }) 
+        }
+        <div className="buttonRow">
+          <button 
+            onClick={()=> setFilterItens({filter: false})}
+            style = {filterItens.filter ? {} : {fontWeight: "bold"}}
+          >Todos</button>
+          <button 
+            onClick={()=> setFilterItens({filter: true, active: true})}
+            style = {((filterItens.filter) && (filterItens.active === true)) ? {fontWeight: "bold"} : {}}
+          >Pendentes</button>
+          <button 
+            onClick={()=> setFilterItens({filter: true, active: false})}
+            style = {((filterItens.filter) && (filterItens.active === false)) ? {fontWeight: "bold"} : {}}
+          >Concluídos</button>
+        </div>
+
+        <div className="buttonRow">
+          <button onClick={insertDocument}>Inserir novo To-Do</button>
+        </div>
+
+      </div>
 
     </div>
   );
